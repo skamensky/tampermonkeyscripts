@@ -12,18 +12,21 @@
 window.lastLocationHref="";
 
 const addCopyButton = ()=>{
-    if(window.lastLocationHref!=window.location.href){
-        window.lastLocationHref=window.location.href;
-        window.copyPath = ()=>{
-            const keyComponent = window.location.href.replace('https://s3.console.aws.amazon.com/s3/','').replace('buckets/','').replace('object/','')
-            const s3Path = 's3://' + keyComponent.substring(0,keyComponent.indexOf('?'));
-            document.body.insertAdjacentHTML('beforeend','<textarea id="s3pathcopy">' +s3Path+ '</textarea>');
-            document.getElementById('s3pathcopy').select();
-            document.execCommand("copy");
-            document.getElementById('s3pathcopy').remove();
-        }
-        document.querySelector('awsui-breadcrumb-group').insertAdjacentHTML('beforeend','<br><button onClick="copyPath()">Copy Path</button>');
-    }
+
+	if(document.querySelector('#copyPathButton')!=null){
+		if(window.lastLocationHref!=window.location.href){
+			window.lastLocationHref=window.location.href;
+			window.copyPath = ()=>{
+			const keyComponent = window.location.href.replace('https://s3.console.aws.amazon.com/s3/','').replace('buckets/','').replace('object/','')
+			const s3Path = 's3://' + keyComponent.substring(0,keyComponent.indexOf('?'));
+			document.body.insertAdjacentHTML('beforeend','<textarea id="s3pathcopy">' +s3Path+ '</textarea>');
+			document.getElementById('s3pathcopy').select();
+			document.execCommand("copy");
+			document.getElementById('s3pathcopy').remove();
+			}
+		document.querySelector('awsui-breadcrumb-group').insertAdjacentHTML('beforeend','<br><button id="copyPathButton" onClick="copyPath()">Copy Path</button>');
+	    }
+	}
 }
 
 
