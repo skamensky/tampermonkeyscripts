@@ -6,6 +6,7 @@ Links:
 
 * refresh_airflow_graph.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/refresh_airflow_graph.js
 * redirect_from_s3_uri_to_s3_url.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/redirect_from_s3_uri_to_s3_url.js
+* auto_fill_meckano.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/auto_fill_meckano.js
 * reload_logs.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/reload_logs.js
 * remove_clientside_s3_delete_validation.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/remove_clientside_s3_delete_validation.js
 
