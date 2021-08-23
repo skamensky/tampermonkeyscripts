@@ -53,7 +53,7 @@
       selectStart.innerHTML = hourOptions;
   
       const labelEnd = document.createElement("label");
-      labelEnd.for = "sfly_selesfly_selectEndctStart";
+      labelEnd.for = "sfly_selectEnd";
       labelEnd.innerHTML = "Choose an end time";
       const selectEnd = document.createElement("select");
       selectEnd.id = "sfly_selectEnd";
@@ -61,7 +61,7 @@
       selectEnd.innerHTML = hourOptions;
   
       ourButton.onclick = () => {
-        //reset state
+        //reset state in case the user wants to make an additional change
         window.sfly_auto_data.status = null;
         document.querySelector(SHOW_REPORT_BUTTON_SELECTOR).click();
       };
