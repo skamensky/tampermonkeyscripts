@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         shufersal_sort_by_actual_price
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Side step shufersal upsell by giving transparency on actual pricing
 // @author       Shmuel Kamensky
 // @match        https://www.shufersal.co.il/*
