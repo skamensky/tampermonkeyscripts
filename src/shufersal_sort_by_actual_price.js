@@ -142,20 +142,10 @@
       
      function addMessageElem() {
         const message = document.createElement("p");
-        message.textContent = "Product reorder message ";
+        message.textContent = "";
         message.id = "reorderByPriceMessage";
         message.dir="ltr"
         addElement(message);
-      }
-
-      function changeParentStyle(){
-        addStyle(
-            `
-            .breadCompareRow {
-                flex-flow: row wrap !important;
-        `
-        )
-        
       }
       
       function initialize(){
@@ -181,6 +171,10 @@
              font-size: 200% !important;
         }
         `)
+        addStyle(`
+            .breadCompareRow {
+                flex-flow: row wrap !important;
+        `);
         addButton();
         addMessageElem();
       }
