@@ -88,7 +88,7 @@
         let button = document.createElement("button");
         button.textContent = "Order items by price per unit";
         button.id = "reorderByPriceButton";
-        button.addEventListener("click", () => scrollNTimes(4));
+        button.addEventListener("click", () => scrollNTimes(6));
         sibling.parentNode.insertBefore(button, sibling);
         console.log(button);
       }
