@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         shufersal_sort_by_actual_price
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Side step shufersal upsell by giving transparency on actual pricing
 // @author       Shmuel Kamensky
 // @match        https://www.shufersal.co.il/*
@@ -126,10 +126,7 @@
       }
 
       function addElement(elem){
-        const parent = document.querySelector('.itemsMenu.header');
-        // const parent = document.querySelector('.mainSearch');
-        // const parent = document.querySelector(".wrapperMainHeaderTop")
-        // const parent = document.querySelector("#main")
+        const parent = document.querySelector('.breadCompareRow ');
         const sibling = parent.children[0];
         sibling.parentNode.insertBefore(elem, sibling);
       }
@@ -145,10 +142,20 @@
       
      function addMessageElem() {
         const message = document.createElement("p");
-        message.textContent = "Reorder status will go here";
+        message.textContent = "Product reorder message ";
         message.id = "reorderByPriceMessage";
         message.dir="ltr"
         addElement(message);
+      }
+
+      function changeParentStyle(){
+        addStyle(
+            `
+            .breadCompareRow {
+                flex-flow: row wrap !important;
+        `
+        )
+        
       }
       
       function initialize(){
