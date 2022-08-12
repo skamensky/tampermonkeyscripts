@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         shufersal_sort_by_actual_price
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Side step shufersal upsell by giving transparency on actual pricing
 // @author       You
 // @match        https://www.shufersal.co.il/*
@@ -49,32 +49,74 @@
         return 0;
       }
       
-      function scrollNTimes(n) {
-        window.scrollTo(0, document.body.scrollHeight);
-        for (i = 0; i < n; i++) {
-          setTimeout(() => window.scrollTo(0, document.body.scrollHeight), i * 2000);
+      function getPersistentValue(key){
+        let data=JSON.parse(localStorage.getItem('shufersal_sort_by_actual_price'));
+        if(data==null){
+            data = {};
+        } 
+        return data[key];
+      }
+
+      function setPersistentValue(key,value){
+        let data=JSON.parse(localStorage.getItem('shufersal_sort_by_actual_price'));
+        if(data==null){
+            data = {};
         }
-        setTimeout(() => {
-          window.scrollTo(0, document.body.scrollHeight);
-          reorder();
-        }, n * 2000);
+          data[key]=value;
+          localStorage.setItem('shufersal_sort_by_actual_price', JSON.stringify(data));
+      }
+
+      function scrollUntilEnd() {
+        window.scrollTo(0, document.body.scrollHeight);
+        const intervalId=setInterval(()=>{
+
+            const lastNewScrollHeight = getPersistentValue('lastNewScrollHeight');
+            const lastScrollTime = new Date(getPersistentValue('lastScrollTime'));
+
+            window.scrollTo(0, document.body.scrollHeight);            
+            const currentScrollHeight=document.body.scrollHeight;
+            const now =new Date();
+            const secondsSinceLastScroll = (now - lastScrollTime)/1000;
+
+            if(lastNewScrollHeight!=currentScrollHeight){
+                setPersistentValue('lastNewScrollHeight',document.body.scrollHeight);
+                setPersistentValue('lastScrollTime',now.toJSON());
+            }
+            else if (secondsSinceLastScroll>2){
+                clearInterval(Number(getPersistentValue('intervalId')));
+                reorder();
+            }
+        },100)
+        setPersistentValue('intervalId',intervalId);
+
+        showMessage("Loading all products...");
       }
       
       function reorder() {
-        const items = document.querySelectorAll("li .miglog-prod");
-        const parent = items[0].parentElement;
-      
-        const itemAndCleanPrice = Array.from(items).map((item) => {
-          const dirtyPrice = item.querySelector(".smallText").textContent;
-          const cleanPrice = parsePricePerItem(dirtyPrice);
-          return { item, cleanPrice };
-        });
-        const itemsSorted = itemAndCleanPrice
-          .sort(compare)
-          .map((itemAndPrice) => itemAndPrice.item);
-        parent.replaceChildren(...itemsSorted);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        alert("DONE");
+          try{
+            const items = document.querySelectorAll("li .miglog-prod");
+            const parent = items[0].parentElement;
+          
+            const itemAndCleanPrice = Array.from(items).map((item) => {
+              const dirtyPrice = item.querySelector(".smallText").textContent;
+              const cleanPrice = parsePricePerItem(dirtyPrice);
+              return { item, cleanPrice };
+            });
+            const itemsSorted = itemAndCleanPrice
+              .sort(compare)
+              .map((itemAndPrice) => itemAndPrice.item);
+            parent.replaceChildren(...itemsSorted);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            showMessage("Done 😇. You can now enjoy shopping with confidence 🛒!");
+          }
+        catch(e){
+            showMessage("Error 😞. If you know what you're doing you can look at the console for the error.");
+            console.trace(e);
+        }
+      }
+
+      function showMessage(message){
+         document.getElementById("reorderByPriceMessage").innerText = message;
       }
       
       function addStyle(styleString) {
@@ -82,38 +124,63 @@
         style.textContent = styleString;
         document.head.append(style);
       }
-      
-      function addButton() {
-        let sibling = document.querySelector(".wrapperMainHeaderTop").children[0];
-        let button = document.createElement("button");
-        button.textContent = "Order items by price per unit";
-        button.id = "reorderByPriceButton";
-        button.addEventListener("click", () => scrollNTimes(6));
-        sibling.parentNode.insertBefore(button, sibling);
-        console.log(button);
+
+      function addElement(elem){
+        const parent = document.querySelector('.itemsMenu.header');
+        // const parent = document.querySelector('.mainSearch');
+        // const parent = document.querySelector(".wrapperMainHeaderTop")
+        // const parent = document.querySelector("#main")
+        const sibling = parent.children[0];
+        sibling.parentNode.insertBefore(elem, sibling);
       }
       
-      addStyle(`
-      #reorderByPriceButton {
-          background-color: #4CAF50 !important;
+      function addButton() {
+        const button = document.createElement("button");
+        button.textContent = "Order items by price per unit";
+        button.id = "reorderByPriceButton";
+        button.dir="ltr";
+        button.addEventListener("click", () => scrollUntilEnd());
+        addElement(button);
+      }
       
-          border: none !important; 
-          color: white !important; 
-          padding: 15px 32px !important; 
-          text-align: center !important;  
-          text-decoration: none !important;  
-          display: block !important;
-          width: 100% !important;
-          font-size: 16px !important;  
-          margin: 4px 2px !important; 
-          cursor: pointer !important;  
-          border-color: #599a68 !important;
+     function addMessageElem() {
+        const message = document.createElement("p");
+        message.textContent = "Reorder status will go here";
+        message.id = "reorderByPriceMessage";
+        message.dir="ltr"
+        addElement(message);
+      }
+      
+      function initialize(){
+        addStyle(`
+        #reorderByPriceButton {
+            background-color: #4CAF50 !important;
+            border: none !important; 
+            color: white !important; 
+            padding: 15px 32px !important; 
+            text-align: center !important;  
+            text-decoration: none !important;  
+            display: block !important;
+            width: 100% !important;
+            font-size: 16px !important;  
+            margin: 4px 2px !important; 
+            cursor: pointer !important;  
+            border-color: #599a68 !important;
+          }
+        `);
+
+        addStyle(`
+        #reorderByPriceMessage {
+             font-size: 200% !important;
         }
-      `);
-      
+        `)
+        addButton();
+        addMessageElem();
+      }
+
       setInterval(() => {
         if (document.getElementById("reorderByPriceButton") == null) {
-          addButton();
+          initialize()
         }
       }, 200);    
 })();
