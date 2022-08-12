@@ -110,7 +110,7 @@
             showMessage("Done 😇. You can now enjoy shopping with confidence 🛒!");
           }
         catch(e){
-            showMessage("Error 😞. If you know what you're doing you can look at the console for the error.");
+            showMessage("Error 😞. Look at the console additional information.");
             console.trace(e);
         }
       }
