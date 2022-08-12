@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         shufersal_sort_by_actual_price
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  Side step shufersal upsell by giving transparency on actual pricing
 // @author       Shmuel Kamensky
 // @match        https://www.shufersal.co.il/*
@@ -57,6 +57,15 @@
         return data[key];
       }
 
+      function deletePersistentValue(key){
+        let data=JSON.parse(localStorage.getItem('shufersal_sort_by_actual_price'));
+        if(data==null){
+            data = {};
+        } 
+        delete data[key];
+        localStorage.setItem('shufersal_sort_by_actual_price', JSON.stringify(data));
+      }   
+
       function setPersistentValue(key,value){
         let data=JSON.parse(localStorage.getItem('shufersal_sort_by_actual_price'));
         if(data==null){
@@ -84,6 +93,7 @@
             }
             else if (secondsSinceLastScroll>2){
                 clearInterval(Number(getPersistentValue('intervalId')));
+                deletePersistentValue('intervalId');
                 reorder();
             }
         },100)
