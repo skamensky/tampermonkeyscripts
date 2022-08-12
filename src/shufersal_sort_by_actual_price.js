@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.2
 // @description  Side step shufersal upsell by giving transparency on actual pricing
-// @author       You
+// @author       Shmuel Kamensky
 // @match        https://www.shufersal.co.il/*
 // @grant        none
 // ==/UserScript==
