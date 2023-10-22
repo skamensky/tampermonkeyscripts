@@ -5,6 +5,7 @@ To install one of these, go to the Tamper Monkey dashboard -> Utilities, paste o
 Links:
 
 * reload_logs.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/reload_logs.js
+* chatgpt_bulk_delete.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/chatgpt_bulk_delete.js
 * remove_clientside_s3_delete_validation.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/remove_clientside_s3_delete_validation.js
 * shufersal_sort_by_actual_price.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/shufersal_sort_by_actual_price.js
 * refresh_airflow_graph.js: https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/refresh_airflow_graph.js
