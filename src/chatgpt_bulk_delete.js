@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bulk_delete_chatgpt
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Add bulk delete UI to chat gpt
 // @author       Shmuel Kamensky
 // @match        https://chat.openai.com/*
@@ -17,20 +17,34 @@
     globalData.token = "";
     globalData.tokenError = false;
     globalData.selectedChats = {};
+    globalData.extensionOutdated = false;
   };
-  
+
+
+
   const checkBoxHandler = (e) => {
     e.stopPropagation();
-  
     const liElement = e.target.closest("li");
     const keys = Object.keys(liElement);
     let chatObj = {};
     for (const key in keys) {
-      if (keys[key].includes("reactProps")) {
+        if (keys[key].includes("reactProps")) {
         const propsKey = keys[key];
         if (liElement[propsKey].children && liElement[propsKey].children.props) {
-          const textContent = liElement[propsKey].children.props.title;
-          const chatId = liElement[propsKey].children.props.id;
+          if(!liElement[propsKey].children.props.conversation){
+            // the frontend has changed since we last updated this script. Make it clear that the extension does not work by disabling the checkbox.
+            e.target.checked = false;
+            e.target.disabled = true;
+            e.target.style.opacity = 0.5;
+
+            // TODO mark all checkboxes as disabled
+            globalData.extensionOutdated = true;
+            return;
+          }
+
+          const chatData = liElement[propsKey].children.props.conversation;
+          const textContent = chatData.title;
+          const chatId = chatData.id;
           chatObj = {
             id: chatId,
             text: textContent,
@@ -47,7 +61,7 @@
       }
     }
   };
-  
+
   const addCheckboxesToChatsIfNeeded = () => {
     // is a chat item and doesn't already have a checkbox
     const chats = document.querySelectorAll(
@@ -61,9 +75,7 @@
       inputElement.setAttribute("type", "checkbox");
       inputElement.setAttribute("class", "customCheckbox");
       inputElement.onclick = checkBoxHandler;
-      chat
-        .querySelector("svg")
-        .insertAdjacentElement("beforeBegin", inputElement);
+      chat.querySelector("a").insertAdjacentElement("afterbegin", inputElement);
     });
   };
   const closeDialog = () => {
@@ -74,7 +86,7 @@
       input.disabled = false;
     });
   };
-  
+
   const getSecChUaString = () => {
     if (navigator.userAgentData && navigator.userAgentData.brands) {
       return navigator.userAgentData.brands
@@ -87,7 +99,7 @@
       return '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"';
     }
   };
-  
+
   const getPlatform = () => {
     if (navigator.userAgentData && navigator.userAgentData.platform) {
       return navigator.userAgentData.platform;
@@ -95,7 +107,7 @@
       return `"Linux"`;
     }
   };
-  
+
   const getToken = () => {
     //https://chat.openai.com/api/auth/session
     return fetch("https://chat.openai.com/api/auth/session", {
@@ -125,7 +137,7 @@
         globalData.tokenError = true;
       });
   };
-  
+
   const doDelete = (chatId) => {
     return fetch(`https://chat.openai.com/backend-api/conversation/${chatId}`, {
       headers: {
@@ -150,12 +162,12 @@
       credentials: "include",
     }).then((res) => res.json());
   };
-  
+
   const setDialogError = (error) => {
     const errorDiv = document.getElementById("customErrorDiv");
     errorDiv.innerHTML = `<span style="color:red;">${error}</span>`;
   };
-  
+
   const addBulkDeleteButton = () => {
     const html = `
         <div id="customOpenBulkDeleteDialog" class="mb-1 flex flex-row gap-2">
@@ -177,9 +189,9 @@
     `;
     document.querySelector('nav').querySelector('div').insertAdjacentHTML("afterend", html);
     document.getElementById("customOpenBulkDeleteDialog").onclick = showDeleteDialog;
-  
+
   };
-  
+
   const deleteSelectedChats = () => {
     const selectedChatIds = Object.keys(globalData.selectedChats);
     const doDeleteLocal = (chatId) => {
@@ -187,18 +199,18 @@
       return doDelete(chatId)
         .then((res) => {
           if (res.success || res.success === false) {
-            
+
             // remove from chats
             const chatElement = document.querySelector(
               `li[data-projection-id="${globalData.selectedChats[chatId].projectionId}"]`
             );
-  
+
             // removing the elements breaks the react client state. We'll offer to do a page refresh instead.
             // chatElement.closest("li").remove();
-  
+
             // keep globalData in sync
             delete globalData.selectedChats[chatId];
-  
+
             // strike through in dialog box and green
             dialogChatElement.innerHTML = `<s>${dialogChatElement.innerHTML}</s>`;
             dialogChatElement.style.color = "green";
@@ -219,12 +231,12 @@
         }, 100 * index);
       });
     });
-  
+
     const done = () => {
       const dialogElement = document.getElementById("customDeleteDialog");
       dialogElement.querySelector(".customCancelButton").innerHTML = "Close";
       dialogElement.querySelector(".customDeleteButton").disabled = true;
-      
+
       const refreshPageButton = document.createElement("button");
       refreshPageButton.innerHTML = `<button class="btn relative btn-neutral customCancelButton" as="button"><div class="flex w-full gap-2 items-center justify-center">Refresh Page</div></button>`
       refreshPageButton.onclick = () => {
@@ -243,7 +255,7 @@
         setDialogError("Error deleting chats. Please try again");
       });
   };
-  
+
   const showDeleteDialog = () => {
     // disable inputs
     const inputs = document.querySelectorAll(".customCheckbox");
@@ -251,7 +263,7 @@
       input.disabled = true;
     });
     const dialogElement = document.createElement("div");
-     
+
     dialogElement.setAttribute("id", "customDeleteDialog");
     let message = "";
     if (Object.keys(globalData.selectedChats).length === 0) {
@@ -267,7 +279,7 @@
     {SELECTED_CHATS}
     <div class="mt-5 sm:mt-4" id="customBulkDeleteButtons"><div class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"><button class="btn relative btn-danger customDeleteButton" as="button"><div class="flex w-full gap-2 items-center justify-center">Delete</div></button><button class="btn relative btn-neutral customCancelButton" as="button"><div class="flex w-full gap-2 items-center justify-center">Cancel</div></button></div></div></div></div>
     `;
-  
+
     const formattedChatHTML = Object.values(globalData.selectedChats).map(
       (chat) => {
         return `
@@ -275,12 +287,12 @@
         `;
       }
     );
-  
+
     dialogElement.innerHTML = dialogElement.innerHTML.replace(
       "{SELECTED_CHATS}",
       formattedChatHTML.join("<br>")
     );
-  
+
     const deleteSelectedChatsLocal = () => {
       if (!globalData.token) {
         return getToken()
@@ -301,8 +313,8 @@
           });
       }
     };
-  
-  
+
+
     const modal = document.createElement("div");
     modal.setAttribute("id", "customDeleteDialogModal");
     modal.appendChild(dialogElement);
@@ -319,16 +331,16 @@
     dialogElement.querySelector(".customDeleteButton").onclick = deleteSelectedChatsLocal;
     dialogElement.querySelector(".customCancelButton").onclick = closeDialog;
   };
-  
+
   const initializeIfNeeded = () => {
     if(!document.getElementById("customOpenBulkDeleteDialog")){
       initGlobalData();
       addBulkDeleteButton();
     }
       addCheckboxesToChatsIfNeeded();
-    
+
   };
-  
+
   const ready = ()=>{
     return document.querySelector('nav li');
   }
