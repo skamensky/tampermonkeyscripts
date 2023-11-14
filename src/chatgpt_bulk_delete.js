@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bulk_delete_chatgpt
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Add bulk delete UI to chat gpt
 // @author       Shmuel Kamensky
 // @match        https://chat.openai.com/*
@@ -24,6 +24,16 @@
 
   const checkBoxHandler = (e) => {
     e.stopPropagation();
+    e.preventDefault();
+    
+    // hack. Without preventDefault each click of the checkbox reloads the page on firefox. I never discovered why.
+    // When preventing default the checkbox state does not persist to the DOM
+    // after the user clicks. We need to manually set the DOM state. However, doing it directly
+    // is rolled back by the browser. So we do it via setTimeout to make it work.
+    setTimeout(()=>{
+      e.target.checked=!e.target.checked;
+    },1)
+  
     const liElement = e.target.closest("li");
     const keys = Object.keys(liElement);
     let chatObj = {};
