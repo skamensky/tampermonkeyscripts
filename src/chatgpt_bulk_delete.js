@@ -4,7 +4,7 @@
 // @version      0.3
 // @description  Add bulk delete UI to chat gpt
 // @author       Shmuel Kamensky
-// @match        https://chat.openai.com/*
+// @match        https://chatgpt.com/*
 // @grant        none
 // ==/UserScript==
 
@@ -25,7 +25,7 @@
   const checkBoxHandler = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     // hack. Without preventDefault each click of the checkbox reloads the page on firefox. I never discovered why.
     // When preventing default the checkbox state does not persist to the DOM
     // after the user clicks. We need to manually set the DOM state. However, doing it directly
@@ -33,7 +33,7 @@
     setTimeout(()=>{
       e.target.checked=!e.target.checked;
     },1)
-  
+
     const liElement = e.target.closest("li");
     const keys = Object.keys(liElement);
     let chatObj = {};
@@ -119,8 +119,8 @@
   };
 
   const getToken = () => {
-    //https://chat.openai.com/api/auth/session
-    return fetch("https://chat.openai.com/api/auth/session", {
+    //https://chatgpt.com/api/auth/session
+    return fetch("https://chatgpt.com/api/auth/session", {
       headers: {
         accept: "*/*",
         "accept-language": "en-US",
@@ -134,7 +134,7 @@
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
       },
-      referrer: "https://chat.openai.com/",
+      referrer: "https://chatgpt.com/",
       referrerPolicy: "same-origin",
     })
       .then((res) => res.json())
@@ -149,7 +149,7 @@
   };
 
   const doDelete = (chatId) => {
-    return fetch(`https://chat.openai.com/backend-api/conversation/${chatId}`, {
+    return fetch(`https://chatgpt.com/backend-api/conversation/${chatId}`, {
       headers: {
         accept: "*/*",
         "accept-language": "en-US",
@@ -164,7 +164,7 @@
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
       },
-      referrer: `https://chat.openai.com/c/${chatId}`,
+      referrer: `https://chatgpt.com/c/${chatId}`,
       referrerPolicy: "same-origin",
       body: '{"is_visible":false}',
       method: "PATCH",
@@ -250,7 +250,7 @@
       const refreshPageButton = document.createElement("button");
       refreshPageButton.innerHTML = `<button class="btn relative btn-neutral customCancelButton" as="button"><div class="flex w-full gap-2 items-center justify-center">Refresh Page</div></button>`
       refreshPageButton.onclick = () => {
-        window.location='https://chat.openai.com/';
+        window.location='https://chatgpt.com/';
         window.location.reload();
       }
       dialogElement.querySelector("#customBulkDeleteButtons").appendChild(refreshPageButton);
