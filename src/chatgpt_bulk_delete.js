@@ -6,6 +6,8 @@
 // @author       Shmuel Kamensky
 // @match        https://chatgpt.com/*
 // @grant        none
+// @downloadURL  https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/chatgpt_bulk_delete.js
+// @updateURL    https://raw.githubusercontent.com/skamensky/tampermonkeyscripts/master/src/chatgpt_bulk_delete.js
 // ==/UserScript==
 
 (function () {
